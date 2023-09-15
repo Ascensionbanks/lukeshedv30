@@ -1,0 +1,20 @@
+.movieimg {
+	width: px;
+	height: 180px;
+	border-radius: 19px;
+	margin: 10px;
+	transition: 1s;
+}
+.movieimg:hover {
+	width: px;
+	height: 160px;
+}
+.moviename {
+	visibility: hidden;
+	opacity: 0;
+	transition: 1s;
+}
+.movieimg:hover .moviename{
+		visibility: visible;
+	opacity: 1;
+}

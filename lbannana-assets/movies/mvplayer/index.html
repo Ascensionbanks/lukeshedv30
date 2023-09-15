@@ -1,0 +1,1566 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">			
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>Video Player for Google Drive</title>
+		
+
+<meta name="description" content="Get a video, audio file from Google Drive, and Play the file directly. You can choose a video, audio file to play from Google Drive and local computer. Supports formats: mp4, m4v, webm, flv, ogv, mov, mp3, ogg, opus, wav, m4a, flac, mkv.">
+<meta name="keywords" content="online video player, video player for google drive, drive video player, mp4 video player, flv video player, mp4, m4v, webm, flv, ogv, mov, mp3, ogg, opus, wav, m4a, flac, mkv">
+
+<meta property="og:title" content="Video Dictionary, YouTube Dictionary"> 
+<meta property="og:description" content="Get a video, audio file from Google Drive, and Play the file directly. You can choose a video, audio file to play from Google Drive and local computer. Supports formats: mp4, m4v, webm, flv, ogv, mov, mp3, ogg, opus, wav, m4a, flac, mkv.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="//youfiles.herokuapp.com/videodictionary/img/logo128.png">
+
+<link rel="shortcut icon" href="./favicon.ico">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="js/common2.js" type="text/javascript"></script>
+<style>
+body,table,span,button,select{
+	font-size:14px;
+    font-family: Arial, Helvetica, sans-serif; /*Trebuchet MS, Tahoma, Verdana*/
+}
+body{
+	/*overflow-y:hidden;
+	margin-left: 4px;
+	margin-right: 4px;
+	margin-bottom: 0px;*/
+}
+
+A:link    {color:#0860A8;text-decoration:none;}
+A:visited {color:#0860A8;text-decoration:none;}
+A:active  {color:#0860A8;text-decoration:underline;}
+A:hover  {color:#0860A8;text-decoration:underline;}
+
+.divopt{
+	/*box-shadow: 0 1px 5px #999, inset 0 1px 20px #999;  -o-box-shadow: 0 1px 5px #999, inset 0 1px 20px #999;   
+	-webkit-box-shadow: 0 1px 5px #999, inset 0 1px 20px #999;   
+	-moz-box-shadow: 0 1px 5px #999, inset 0 1px 20px #999;*/
+}
+
+A.suggest:link    {text-decoration:underline;}
+A.suggest:visited {text-decoration:underline;}
+A.suggest:active  {text-decoration:underline;}
+A.suggest:hover  {text-decoration:underline;}
+</style>
+
+<script>
+var henc=html_entity_encode;
+var gload1,gload2;
+var okflash=null;
+function check_flash(){
+	if(okflash!=null)return;
+	okflash=false;
+	try{
+		if(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'))okflash=true;
+	}catch(e){
+		var a=navigator.mimeTypes;
+		if(a && a['application/x-shockwave-flash'] != undefined && a['application/x-shockwave-flash'].enabledPlugin)okflash=true;
+	}
+}
+function proc_imgerr(f){
+	f.onerror=null;
+	f.src="images/article.png";
+}
+
+var g_history=[];
+function setstorage(name,value){
+	if(name!='c_prefer_ext') name="vidd_"+name;
+	if (window.localStorage){
+		localStorage[name]=value+'';
+	}else{
+		//setCookie(name, value, 1000*60*60*24*365*10); 
+	}
+}
+function getstorage(name){
+	if(name!='c_prefer_ext') name="vidd_"+name;
+	var s;
+	if (window.localStorage){
+		s=localStorage[name];
+	}else{
+		//s=getCookie(name);
+	}
+	return s;
+}
+function setCookie(name, value, expires) { 
+	if(name!='c_prefer_ext') name="vidd_"+name;
+  if (!expires) expires=1000*60*60*24*365*5;
+  path="/";
+  domain=document.domain;
+  secure=false;
+  var today = new Date(); 
+  today.setTime( today.getTime() ); 
+  var expires_date = new Date( today.getTime() + (expires) ); 
+  document.cookie = name + "=" +escape( value ) + 
+          ( ( expires ) ? ";expires=" + expires_date.toGMTString() : "" ) + //expires.toGMTString() 
+          ( ( path ) ? ";path=" + path : "" ) + 
+          ( ( domain ) ? ";domain=" + domain : "" ) + 
+          ( ( secure ) ? ";secure" : "" ); 
+} 
+
+function getCookie( name ) {
+	if(name!='c_prefer_ext') name="vidd_"+name;
+  var nameOfCookie = name + "=";
+  var x = 0;
+  while ( x <= document.cookie.length ) {
+    var y = (x+nameOfCookie.length);
+    if ( document.cookie.substring( x, y ) == nameOfCookie ) {
+      if ( (endOfCookie=document.cookie.indexOf( ";", y )) == -1 )
+         endOfCookie = document.cookie.length;
+      return unescape( document.cookie.substring( y, endOfCookie ) );
+    }
+    x = document.cookie.indexOf( " ", x ) + 1;
+    if ( x == 0 ) break;
+  }
+  return "";
+}
+
+function addhistory(q){
+	if(g_history.length>30){
+		g_history.splice(0,1);
+	}
+	var s=q;//.toLowerCase();
+	for(var i=0; i < g_history.length; i++){
+		if(g_history[i]==s){
+			g_history.splice(i,1);
+			break;
+		}
+	}
+	g_history.push(q);
+	if(window.JSON){
+		setstorage("c_dictionary_history",JSON.stringify(g_history));
+	}
+	displayhistory();
+}
+function displayhistory(){
+	var s='<select id="history" onchange="history_onchange(this)" style="width:210px;font-size:16px"><option value="">*History</option>';
+	for(var i=g_history.length-1; i >= 0 ; i--){
+		s+="<option value='"+escape(g_history[i])+"'>"+henc(g_history[i])+"</option>";
+	}
+	s+="</select>";
+	_getid("div_history").innerHTML=s;
+}
+function history_onchange(f){
+	if(!f.value) return;
+   	clearInterval(tricktimer);
+	tricktimer=null;   	  	   	  	    	  	
+	document.f1.q.value=unescape(f.value);
+	proc_search(true,true);
+}
+
+function proc_deleteall(){
+	var answer = confirm("Are you sure?");
+	if(!answer) return;
+	g_history=[];
+	if(window.JSON) setstorage("c_dictionary_history",JSON.stringify(g_history));
+	displayhistory();
+}
+
+function getWindowWidth(){
+    var windowWidth = 0;
+    if (typeof(window.innerWidth) == 'number'){
+        windowWidth = window.innerWidth;
+    }else{
+        var ieStrict = document.documentElement.clientWidth; // w/out DTD gives 0
+        var ieQuirks = document.body.clientWidth; // w/DTD gives document width
+        windowWidth = (ieStrict > 0) ? ieStrict : ieQuirks;
+    }
+    return windowWidth;
+}
+
+function getWindowHeight(){
+    var windowHeight = 0;
+    if (typeof(window.innerHeight) == 'number'){
+        windowHeight = window.innerHeight;
+    }else{
+        var ieStrict = document.documentElement.clientHeight; 
+        var ieQuirks = document.body.clientHeight;
+        windowHeight = (ieStrict > 0) ? ieStrict : ieQuirks;
+    }
+	if(!windowHeight) windowHeight=0;
+    return windowHeight;
+}
+
+function getOffset(b,e) {
+    var a = 0;
+    var c = 0;
+
+    while (b && !isNaN(b.offsetLeft) && !isNaN(b.offsetTop)) {
+        a += b.offsetLeft;
+        c += b.offsetTop;
+        b = b.offsetParent;
+    }
+
+    if (e) {
+    	b2=e.target;
+    	while (b2 && !isNaN(b2.scrollLeft) && !isNaN(b2.scrollTop)) {
+    		if (b2==document.body) break;
+      	  	a = a-b2.scrollLeft;
+      	  	c = c-b2.scrollTop;
+			if (b2.parentElement) b2=b2.parentElement;
+			else b2=b2.parentNode;
+    	}
+    }       
+    return {
+        left: a,
+        top: c
+    }
+}
+
+/*var g_searchstarted=false;
+function proc_onresize(){
+	if(!g_searchstarted) return;
+	var c,a,w1,h1; 
+
+	var h=getWindowHeight();
+	var w=getWindowWidth();
+	if(w>1500) w=1500;
+
+	a=_getid("cse");
+	c=getOffset(a);
+	h1=h-c.top;
+	a.style.height=(h1-6)+"px";
+}*/
+
+function init(){
+		/*window.onresize=proc_onresize;
+	window.onscroll=function(){
+		if(document.body) document.body.scrollTop=0;
+		if(document.documentElement) document.documentElement.scrollTop=0;
+	}*/
+}
+</script>
+</head>
+
+<body onload="">
+
+<style>
+	#ajax_listOfOptions{
+		-webkit-box-shadow: 0 0 5px #999;	-moz-box-shadow: 0 0 5px #999;	box-shadow: 0 0 5px #999;	
+		position:absolute;
+		width:380px;	
+		/*height:212px;*/
+		overflow:auto;	
+		border:1px solid #DBAB4F;
+		background-color:#FFF;	
+		text-align:left;
+		font-size:1.1em;
+		color:#000000;
+		z-index:99999999;
+		padding-left: 4px;
+		scrollbar-face-color: white; scrollbar-shadow-color: #D9E7FF; 
+      scrollbar-highlight-color: white; scrollbar-3dlight-color: #D9E7FF; 
+      scrollbar-darkshadow-color: white; scrollbar-track-color:white; 
+      scrollbar-arrow-color: #000000;
+	}
+	#ajax_listOfOptions div{
+		margin:1px;		
+		padding:1px;
+		cursor:pointer;
+		font-size:16px;
+	}
+	#ajax_listOfOptions .optionDiv{
+		color:#000000;
+	}
+	#ajax_listOfOptions .optionDivSelected{ 
+		background-color:#D5E2FF;
+		color:#000000;
+	}
+	#ajax_listOfOptions_iframe{
+		/*background-color:#F00;*/
+		position:absolute;
+		border-width:0px;
+		z-index:99999991;
+	}
+</style>
+
+
+<table id="maintable" align=center border=0 class="divopt" style="padding:0px;">
+<tr><td colspan=3>
+
+<tr>
+<td>
+<td>
+	<a id="toptitle" href="./" style="color:#aa2222" title="Go Home"><span style="font-size:30px;font-family:Verdana, Arial;">Video Dictionary, YouTube Dictionary</span></a>
+<td>
+
+<!--<tr><td colspan=3 height=3>//-->
+<tr>
+<td>
+<td colspan=2>
+<table cellpadding=0><tr><td>
+<a href='http://videodictionary.kwebpia.net/?m=Video_Dictionary' class='suggest' style='font-size:15px;'>Video Dictionary</a>&nbsp;&nbsp; <a href='http://videodictionary.kwebpia.net/?m=Funny_Videos_of_the_Day' class='suggest' style='font-size:15px;'>Funny Videos of the Day</a>&nbsp;&nbsp; <a href='http://videodictionary.kwebpia.net/?m=AOL_Videos' class='suggest' style='font-size:15px;'>AOL Videos</a>&nbsp;&nbsp; <tr><td><a href='http://videodictionary.kwebpia.net/?m=Full_Movies' class='suggest' style='font-size:15px;'>Full Movies of the Day</a>&nbsp;&nbsp; <a href='http://videodictionary.kwebpia.net/?m=My_Favorite' class='suggest' style='font-size:15px;'>My Favorite</a>&nbsp;&nbsp; <a href='?m=Video_Player_Drive' class='suggest' style='font-size:15px;font-weight:bold'>Video Player for Google Drive</a>&nbsp;&nbsp; </table>
+
+
+<tr>
+<td>
+<td>
+<script>var gadb=false;</script>
+<center>
+<div style="margin-top:5px">
+<script type="text/javascript">
+google_ad_client = "ca-pub-1113541014872557";
+google_ad_slot = "1359537504";
+google_ad_width = 728;
+google_ad_height = 90;
+</script>
+<script type="text/javascript"
+src="//pagead2.googlesyndication.com/pagead/show_ads.js" onerror="gadb=true;">
+</script>
+</div>
+
+<div style="margin-top:5px" id="divopen">
+<table><tr>
+<td><button type="button" id='btn_open' onclick="gd_open_picker()" title="Get a video, audio file from Google Drive" style="font-size:14px"><img src="images/gdrive/product16.png" width=16 align="absmiddle"> Get a video, audio file from Google Drive</button>
+<td><div id="dfile1" style="display:inline"></div>
+</table>
+<div id="downlink" style="height:18px;margin-bottom:3px;margin-top:0px;">Get a video, audio file from Google Drive, and Play the file directly. Provides connect with Google Drive.</div>
+Supports formats: mp4, m4v, webm, flv, ogv, mp3, ogg, wav, m4a, Partially(mkv/H264, mov/MPEG4, opus, flac) &nbsp;<a href="#" onclick="proc_shortcuts();return false" title="Show Video Player Shortcuts">Shortcuts</a>
+</div>
+
+<table><tr>
+<td>Width<td><input type="range" id="size_width" min=200 max=1500 step="1" value="640" style="width:140px;padding:0px;" onchange="size_width_onchange(this)">
+<td><input type=number id="size_width_n" style="width:55px" min=200 max=1500 value="640" onchange="size_width_n_onchange(this)">
+<td>
+<td>Height<td><input type="range" id="size_height" min=200 max=900 step="1" value="480" style="width:140px;padding:0px;" onchange="size_width_onchange(this)">
+<td><input type=number id="size_height_n" style="width:55px" min=200 max=900 value="480" onchange="size_width_n_onchange(this)">
+<td>
+<td><button id="btn_default" onclick='proc_default()' style="font-size:13px">Default</button>
+<td><button id="btn_refresh" disabled=true onclick='proc_refresh()' style="font-size:13px">Refresh</button>
+<td><button id="btn_close" disabled=true onclick='proc_close()' style="font-size:13px">Close</button>
+</table>
+<table><tr>
+<td><div id='vphistory'></div>
+<td>
+<td><label><input type=checkbox id="c_vp_repeat" onclick="c_vp_repeat_onclick()"> Repeat Play</label>
+<td><label><input type=checkbox id="c_vp_orgsize" disabled=true onclick="proc_orgsize()"> Original Video Size</label>
+</table>
+<div id='au_entry6981'></div>
+<div id='msg' style="margin-top:5px;font-size:15px"></div>
+<div id='msg2' style="margin-top:5px;display:none"></div>
+
+<div style="margin-top:5px">
+Google Drive: Max playback size is 300 MB (due to the direct download link limit of the Drive API)
+</div>
+
+<div style="margin-top:5px">
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-1113541014872557"
+     data-ad-slot="1359537504"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</center>
+
+<script>
+function c_vp_repeat_onclick(){
+	setstorage('c_vp_repeat',_getid("c_vp_repeat").checked);
+	var a=_getid("audio5");
+	if(a){
+		var ifrm2=_getfrmdoc(a);
+		if(ifrm2){
+			var c=ifrm2.document.getElementById("audio5");			
+			if(c) c.loop=_getid("c_vp_repeat").checked;
+		}
+	}
+}
+function size_width_onchange(f,nosize){
+	var ow=_getid('size_width');
+	var oh=_getid('size_height');
+	var w=ow.value;
+	var h=oh.value;	
+
+	if(w<parseInt(ow.min))w=ow.min;
+	if(w>parseInt(ow.max))w=ow.max;
+	if(h<parseInt(oh.min))h=oh.min;
+	if(h>parseInt(oh.max))h=oh.max;
+
+	setstorage('c_vp_width',w);
+	setstorage('c_vp_height',h);
+
+	if(f){
+		_getid('size_width_n').value=w;
+		_getid('size_height_n').value=h;
+	}
+	function find(parent){	
+		var a=parent.getElementsByTagName('*');
+		for(var i = 0; i < a.length; i++){    
+			/*if(a[i].id=='video1'){
+				alert('1');
+			}*/
+			var s=a[i].tagName;
+			if (s=="IFRAME" || s=="EMBED" || s=="OBJECT"){			
+				if (s=="OBJECT") find(a[i]);
+				a[i].width=w;
+				a[i].height=h;
+			}
+		}
+	}
+	var a=_getid("au_entry6981");
+	if(nosize) return;
+	if(a.getAttribute("isvideo")=="true") find(a);
+	var a=_getid("audio5");
+	if(a){
+		var ifrm2=_getfrmdoc(a);
+		if(ifrm2){
+			var c=ifrm2.document.getElementById("video1");			
+			if(c){
+				c.style.width=w+"px";
+				c.style.height=h+"px";
+			}
+		}
+	}		
+}
+function size_width_n_onchange(f){
+	var ow=_getid('size_width_n');
+	var oh=_getid('size_height_n');
+	var w=ow.value;
+	var h=oh.value;	
+
+	if(w<parseInt(ow.min))w=ow.min;
+	if(w>parseInt(ow.max))w=ow.max;
+	if(h<parseInt(oh.min))h=oh.min;
+	if(h>parseInt(oh.max))h=oh.max;
+
+	_getid('size_width').value=w;
+	_getid('size_height').value=h;
+	size_width_onchange();
+}
+
+function proc_default(){
+	_getid('size_width').value=640;
+	_getid('size_height').value=480;
+	size_width_onchange(_getid('size_width'));
+}
+function proc_refresh(){
+	if(g_lastdata2){
+		proc_audioplay(g_lastdata2, true);
+	}
+}
+function proc_orgsize(){
+	if(!_getid('c_vp_orgsize').checked){
+		size_width_onchange(_getid('size_width'));
+		return;
+	}
+	if(g_lastdata2 && g_lastdata2.resp && g_lastdata2.resp.videoMediaMetadata){
+		var w=g_lastdata2.resp.videoMediaMetadata.width;
+		var h=g_lastdata2.resp.videoMediaMetadata.height;
+		if(w && h){
+			var w2=_getid('size_width').value;
+			var h2=_getid('size_height').value;
+			_getid('size_width').value=w;
+			_getid('size_height').value=h;
+			size_width_onchange();
+			_getid('size_width').value=w2;
+			_getid('size_height').value=h2;
+			return;
+		}
+	}
+	show_message('Can not find the original video size.');
+}
+
+function proc_close(){
+	_getid('au_entry6981').innerHTML='';
+}
+function vphistory_onchange(f){
+	if(!f.value)return;
+	for(var i = 0; i < g_lastdata.length; i++){
+		if(g_lastdata[i].id==f.value){
+			proc_audioplay(g_lastdata[i], true);
+			break;
+		}
+	}
+}
+
+function _getfrmdoc(ifrm){
+	return (ifrm.contentWindow) ? ifrm.contentWindow : (ifrm.contentDocument.document) ? ifrm.contentDocument.document : ifrm.contentDocument;
+}
+var g_mediasupport=null;
+function proc_testmedia(){
+	if(g_mediasupport==null){
+		var a= document.createElement("audio");
+		a=!!(a && a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, ''));
+		var b= document.createElement("video");		
+		b=!!(b && b.canPlayType && b.canPlayType('video/mp4;').replace(/no/, ''));		
+		g_mediasupport={audio: a, video: b};
+	}
+	return g_mediasupport;
+}
+
+function proc_shortcuts(){
+	var s="*Video Player Shortcuts\n";
+	s+="Space: Toggles play/pause\n";
+	s+="Right, Left Arrow: Seek the video forwards and back\n";
+	s+="Up, Down Arrow: Increase and decrease the volume\n";
+	s+="M key: Toggles mute/unmute";
+	alert(s);
+}
+function proc_videojs(win, doc){	
+	if(!win.videojs){
+		alert('Not loaded library properly. Try again. or This browser does not support. Please upgrade your browser.');
+		return;
+	}
+win.videojs("video1").ready(function(){
+	var myPlayer = this;
+	if(myPlayer.hotkeys){
+		myPlayer.hotkeys({
+			volumeStep: 0.1, seekStep: 5, enableModifiersForNumbers: false, enableFullscreen:false, enableNumbers:false, enableVolumeScroll:false
+		});
+	}
+	myPlayer.on("error", function(){ 
+		if(g_lastdata2 && g_lastdata2.resp){
+			var err=this.error();
+			if(err.message=='No compatible source was found for this video.'){
+				var s='<font style="color:red">The player (HTML5, Flash) does not support this media format.';
+				var a=win.videojs.options.techOrder;
+				if(a.length==1 && a[0]=='html5'){
+					s+=' or Local files only support HTML5 player.';
+				}else{
+					check_flash();
+					if(!okflash) s+=' or Check the flash player is installed.</font> <a href="https://www.adobe.com/go/getflashplayer" target="_blank">Get Flash</a>';
+				}
+				s+='</font>';
+				if(g_lastdata2.resp.alternateLink || g_lastdata2.resp.webContentLink){
+					s+='<div style="margin-top:4px"><a href="'+(g_lastdata2.resp.alternateLink || g_lastdata2.resp.webContentLink)+'" target="_blank">Web Content Link</a>';
+					if(g_lastdata2.resp.udownlink) s+=' &nbsp;<a href="'+g_lastdata2.resp.udownlink+'" target="_blank">Web Download Link</a> ('+getsize(g_lastdata2.resp.fileSize)+')';
+					s+='</div>';
+				}
+				_getid("msg").innerHTML=s;
+			}else{			
+				if(g_lastdata2.resp.alternateLink || g_lastdata2.resp.webContentLink){
+					var s='<font style="color:red">Play Error!!</font> Check this <a href="'+(g_lastdata2.resp.alternateLink || g_lastdata2.resp.webContentLink)+'" target="_blank">Web Content Link</a>';
+					if(g_lastdata2.resp.udownlink) s+=' &nbsp;<a href="'+g_lastdata2.resp.udownlink+'" target="_blank">Web Download Link</a> ('+getsize(g_lastdata2.resp.fileSize)+')';
+					_getid("msg").innerHTML=s;
+				}
+			}
+		}
+	});
+
+	myPlayer.on("loadedmetadata", function(){ 
+		var a=doc.getElementsByTagName('VIDEO');
+		if(a && a.length>0){
+			if(g_lastdata2 && g_lastdata2.resp && !g_lastdata2.resp.videoMediaMetadata){				
+				g_lastdata2.resp.videoMediaMetadata={'width':a[0].videoWidth, 'height':a[0].videoHeight};
+			}
+		}
+	});
+
+	var s=getCookie("c_audio_volume");
+	if(!s) s=1;
+	try{
+		myPlayer.volume(s);
+		if(!ismsie) myPlayer.play();
+	}catch(err){
+		return;
+	}	
+	myPlayer.on("volumechange", function(){ 
+		setCookie("c_audio_volume", myPlayer.volume());
+	});
+	myPlayer.on("ended", function(){ 
+		if(document.getElementById("c_vp_repeat").checked){
+			myPlayer.currentTime(0);
+			myPlayer.play();
+		}
+	});
+
+	function exitHandler(){
+		var a=doc.getElementsByTagName('DIV');
+		for(var i = 0; i < a.length; i++){    
+			if(a[i].getAttribute("tabindex")){
+				a[i].focus();
+				break;
+			}
+		}
+	}
+	doc.addEventListener('webkitfullscreenchange', exitHandler, false);
+    doc.addEventListener('mozfullscreenchange', exitHandler, false);
+    doc.addEventListener('fullscreenchange', exitHandler, false);
+    doc.addEventListener('MSFullscreenChange', exitHandler, false);
+});
+}
+
+window.URL=window.URL || window.webkitURL;
+var g_lastdata=[];
+var g_lastdata2={}
+var g_audiointerval, g_working;
+function getsize(fileSize){
+	if(!fileSize) return 'Unknown';
+	function humanFileSize(bytes){
+		var thresh = 1024;
+		if(bytes < thresh) return bytes + ' B';
+		var units = ['kB','MB','GB','TB','PB','EB','ZB','YB'];
+		var u = -1;
+		do {
+			bytes /= thresh;
+			++u;
+		} while(bytes >= thresh);
+		return bytes.toFixed(1)+' '+units[u];
+	}
+	return humanFileSize(fileSize);
+}
+function proc_audioplay(data, ishistory){
+if(gadb){alert('Please disable the adblock for free use.');return;}
+	if(g_working || gd_isdownloading){
+		alert("It's downloading. Please try again in a few seconds.");
+		return;
+	}
+	var src=data.src;
+	var resp=data.resp;
+	/*if(data.time && !resp.file){
+		var now=(new Date()).getTime();
+		var d=now-data.time;
+		if((d>0 && d/1000/60 > 25) || (gd_loginexp>0 && gd_loginexp<now)){
+			g_working=true;
+			gd_login(function(result){
+				if(!result){
+					g_working=false;
+					return;
+				}
+				gd_loadfile(resp.id,function(url){
+					g_working=false;
+					data.time=(new Date()).getTime();
+					data.src=url;
+					proc_audioplay(data, ishistory);
+				});
+			},true);
+			return;
+		}
+	}*/
+
+	_getid("msg").innerHTML='';
+	if(resp && resp.udownlink){
+		_getid("msg").innerHTML='<a href="'+resp.udownlink+'" target="_blank">Web download link for this media</a> ('+getsize(resp.fileSize)+')';
+	}
+
+	if(resp.file){
+		if(!gd_bloburl || !g_lastdata2.resp || g_lastdata2.resp.id!=resp.id){
+			if(gd_bloburl) window.URL.revokeObjectURL(gd_bloburl);
+			gd_bloburl=window.URL.createObjectURL(resp.file);
+		}
+		src=gd_bloburl;
+	}
+
+	g_lastdata2.src=src;
+	g_lastdata2.resp=resp;
+	var os=_getid('c_vp_orgsize');
+	os.checked=false;
+	os.disabled=false;
+	//if(g_lastdata2.resp && g_lastdata2.resp.videoMediaMetadata) os.disabled=false;
+	//else os.disabled=true;	
+
+	if(!ishistory){
+		var tot=data.blobsize || 0;
+		for(var i=g_lastdata.length-1;i>=0;i--){
+			if(g_lastdata[i].blobsize){
+				var fsize=g_lastdata[i].blobsize;
+				tot+=fsize;
+				if(tot>200*1024*1024){					
+					if(g_lastdata[i].src) window.URL.revokeObjectURL(g_lastdata[i].src);					
+					g_lastdata.splice(i,1);
+					tot=tot-fsize;					
+				}
+			}
+		}	
+
+		g_lastdata2.time=(new Date()).getTime();
+		for(var i = 0; i < g_lastdata.length; i++){
+			if(g_lastdata[i].resp.id==resp.id){
+				if(g_lastdata[i].blobsize && g_lastdata[i].src) window.URL.revokeObjectURL(g_lastdata[i].src);
+				g_lastdata.splice(i,1);
+				break;
+			}
+		}
+		var a={};
+		a.id=g_lastdata2.time;
+		a.time=g_lastdata2.time;
+		a.src=src;
+		a.blobsize=data.blobsize;
+		a.resp=resp;
+		g_lastdata.push(a);
+		if(g_lastdata.length>10){
+			if(g_lastdata[0].blobsize && g_lastdata[0].src) window.URL.revokeObjectURL(g_lastdata[0].src);
+			g_lastdata.splice(0,1);
+		}
+
+		var s='History &nbsp;<select onchange="vphistory_onchange(this)" style="width:350px">';
+		for(var i=g_lastdata.length-1;i>=0;i--){
+			s+='<option value="'+g_lastdata[i].id+'">'+henc(g_lastdata[i].resp.title || 'No Name');
+		}
+		s+='</select>';
+		_getid('vphistory').innerHTML=s;
+	}
+
+	proc_testmedia();
+	check_flash();
+
+	g_mediasupport.audio=true;
+	g_mediasupport.video=true;
+	var isvideo=true;	
+	/*if(resp.mimeType){
+		if(resp.mimeType.indexOf("video")>=0) isvideo=true;
+	}*/
+
+	var sw=_getid('size_width').value;
+	var sh=_getid('size_height').value;
+
+	var swf="https://iblogbox.github.io/js/player/jwplayer2.swf";
+	var s='<table><tr><td>';	
+	if(isvideo){
+		s+='<table cellspacing=0 cellpadding=0 align=center><tr><td>';
+		s+='<iframe id="audio5" frameborder=0 marginwidth=0 marginheight=0 leftmargin=0 topmargin=0 scrolling="no" height="'+sh+'" width="'+sw+'" allow="autoplay; fullscreen" allowfullscreen="true"></iframe>'; 
+		s+='<tr><td>';
+	}else{
+		s+='<iframe id="audio5" frameborder=0 marginwidth=0 marginheight=0 leftmargin=0 topmargin=0 scrolling="no" height="45" width="500" allow="autoplay; fullscreen" allowfullscreen="true"></iframe>'; 
+		s+='<tr><td>';
+	}
+	s+='</table>';
+	var a=_getid("au_entry6981");
+	if(a){
+		_getid('btn_refresh').disabled=false;
+		_getid('btn_close').disabled=false;
+
+		var c,ifrm2;
+		a.innerHTML=s;		
+		a.setAttribute("isvideo", isvideo);
+		ifrm2 = _getfrmdoc(_getid("audio5"));
+		if(isvideo && (!okflash || g_mediasupport.video)){					
+						var mt=getmimetype2(resp.mimeType, getmimetype(resp.title));			
+			s='<video id="video1" class="video-js vjs-default-skin" width="'+sw+'" height="'+sh+'" controls preload="auto"><source src="'+src+'" type="'+mt+'"></video>';
+			s='<!DOCTYPE html><html><head><link href="https://vjs.zencdn.net/4.12.11/video-js.css" rel="stylesheet"><sc'+'ript src="https://vjs.zencdn.net/4.12.11/video.js"></s'+'cript><sc'+'ript src="https://iblogbox.github.io/js/player/videojs.hotkeys.min.js"></s'+'cript></head><body>'+s+'<scr'+'ipt>';
+			if(true || resp.file) s+='videojs.options.techOrder=["html5","flash"];';
+			s+='parent.proc_videojs(window, document);</sc'+'ript></body></html>';			
+		}else if(!isvideo && (!okflash || g_mediasupport.audio)){
+			s='<audio id="audio5" style="width:100%" controls autoplay><source src="'+src+'"></audio>';
+		}else{
+			s='<embed width="100%" height="100%" src="'+src+'">'; 
+		}
+		if(ifrm2){
+			ifrm2.document.open();		
+			ifrm2.document.write(s);
+			ifrm2.document.close();		
+			c=ifrm2.document.getElementById("audio5");			
+		}
+		if(c){
+			var s=getCookie("c_audio_volume");
+			if(!s) s=1;
+			c.volume=s;
+			try{c.play();}catch(err){}
+			c.loop=_getid("c_vp_repeat").checked;
+			if(c.addEventListener){
+				c.addEventListener("volumechange", function(){
+					setCookie("c_audio_volume",this.volume);
+				}, false);
+				clearInterval(g_audiointerval);
+				g_audiointerval=setInterval(function(){
+					var s;
+					if(c.networkState==1) s='Media is active.';
+					else if(c.networkState==2) s='Downloading data...';
+					else if(c.networkState==3) s='<font style="color:red">No media source found.</font>';
+					else if(c.networkState==0) s='Media has not yet been initialized.';
+					if(s){
+						_getid('msg').innerHTML='<font style="color:green">'+s+'</font>';
+						_getid('msg').style.display='';
+					}
+				},500);
+			}
+		}
+	}
+}
+
+var gformats=[["aac,","audio/aac"],["m4a,","audio/mp4"],["mp1,mp2,mp3,mpg,mpeg,","audio/mpeg"],["oga,ogg,opus,","audio/ogg"],["wav,","audio/x-wav"],["webm,","video/webm"],["mp4,m4v,","video/mp4"],["weba,","audio/webm"],["flv,","video/x-flv"],["ogv,","video/ogg"],["mkv,","video/x-matroska"],["mov,",""],["flac,","audio/flac"]]; //["caf,","audio/x-caf"]
+function getmimetype(s){
+	var arr=(s || '').split(".");
+	var ext=arr[arr.length-1].toLowerCase()+',';
+	for(var i=0; i <= gformats.length-1; i++){
+		if(gformats[i][0].indexOf(ext)>=0){
+			return gformats[i][1];
+		}
+	}
+}
+function getmimetype2(mt, defaults){
+	function get(){
+		/*if(defaults){
+			return defaults;
+		}*/		
+		mt=(mt || '').toLowerCase();
+		for(var i=0; i <= gformats.length-1; i++){
+			if(gformats[i][1] && gformats[i][1]==mt){
+				return gformats[i][1];
+			}
+		}
+		return defaults || 'video/mp4';
+	}
+	mt=get();
+	if(mt=='video/x-matroska') mt='video/mp4'; 
+	return mt;
+}
+function handleFileSelect(files){
+	if(!window.FileReader || !window.XMLHttpRequest || !window.URL){
+		alert("This browser does not support.");
+		return;
+	}
+	if(!files || files.length==0) return;
+	for(var i = 0, f; f = files[i]; i++){
+		var f=files[i];
+		var resp={};
+		resp.id='(Local) '+f.name;
+		resp.title=resp.id;
+		resp.mimeType=getmimetype(f.name) || 'video/mp4';
+		resp.file=f;
+		var data={};
+		data.resp=resp;
+		proc_audioplay(data);
+		break;
+	}
+}
+function init_load(){
+	var w=getstorage('c_vp_width');
+	var h=getstorage('c_vp_height');
+	if(w && h){
+		_getid('size_width').value=w;
+		_getid('size_height').value=h;
+		size_width_onchange(_getid('size_width'),true);
+	}
+	var s=getstorage('c_vp_repeat');
+	if(s=="true") _getid("c_vp_repeat").checked=true;
+
+	_getid("dfile1").innerHTML='<input type="file" id="fileload1" name="files[]" style="width:230px" title="Get a video, audio file from your computer. Drop a file on this page. Local files only support HTML5 player.">';
+	//_getid("msg2").style.display='';
+	_getid('fileload1').onchange=function(e){
+		if(!e || !e.target){
+			alert("This browser does not support.");
+			return;
+		}
+		handleFileSelect(e.target.files);
+	}
+	var holder = document;
+	holder.ondragover = function(e){ 
+		_getid('divopen').className = 'hover'; 
+		try{var ua=navigator.userAgent;
+			if(ua && ua.indexOf("Chrome")>=0){					
+				if(e.originalEvent) e = e.originalEvent;
+				if(e.dataTransfer){
+					var b = e.dataTransfer.effectAllowed;
+					e.dataTransfer.dropEffect = ('move' === b || 'linkMove' === b) ? 'move' : 'copy';
+				}
+			}
+		}catch(err){}
+		return false; 
+	};
+	holder.ondragend = function(){ _getid('divopen').className = '';return false; };
+	holder.ondrop = function (e){
+		_getid('divopen').className = '';
+		e.preventDefault();				
+		handleFileSelect(e.dataTransfer.files);
+		return false;
+	};
+	if(navigator.userAgent && navigator.userAgent.toLowerCase().indexOf("windows")>=0){
+		var a=_getid('fileload1');
+		var arr;
+		var arr2=[];
+		for(var i=0; i <= gformats.length-1; i++){
+			arr=gformats[i][0].split(',')
+			for(var j=0; j <= arr.length-1; j++){
+				if(arr[j]) arr2.push('.'+arr[j]);
+			}
+		}
+		a.setAttribute("accept",arr2.join(','));
+	}
+}
+init_load();
+</script>
+
+<style>
+.hover { border: 5px dashed #333; }
+.gd_div{background-color:#FFFFE1;position:absolute;overflow:hidden;-webkit-box-shadow: 0 0 25px #999;-moz-box-shadow: 0 0 25px #999;box-shadow: 0 0 25px #999;}
+</style>
+<iframe style="position:absolute;display:none" frameborder=0 id='gd_frame'></iframe>
+<div id="layer_message" class="gd_div" style="z-index:10001;display:none;"></div>
+<div id="gd_btn_login" class="gd_div" style="z-index:10000000;display:none;">
+<table>
+<tr><td align=center><button onclick="gd_login_manual()" style="font-size:20px"><img src="images/gdrive/product20.png" align="absmiddle"> Login & Authorize</button> <button onclick="gd_login_close()" style="font-size:20px">Close</button>
+<tr><td>To use this app, Please login to the Google Drive and authorize this app or website.
+<br>(Note: If your browser block or disable the third-party cookies, this login does not work correctly.)
+</table>
+</div>
+<script>
+var CLIENT_ID = '1008750134848-6cqqtblpu42bbnohgeemhhetgc5tqish.apps.googleusercontent.com';
+var SCOPES = [
+	'https://www.googleapis.com/auth/drive.install',
+	'https://www.googleapis.com/auth/drive.file'
+];
+var gd_developerKey='AIzaSyDjckhjzrGJ3xBgIhGMMbIlXynHVkmf3V8';
+var gd_mimetype="audio/mp4,video/mp4,audio/webm,video/webm,video/ogg,audio/ogg,audio/x-wav,audio/wav,video/flv,video/x-flv,video/m4v,audio/mpeg3,audio/x-mpeg-3,audio/mpeg,application/mp4,application/ogg,video/mpeg,video/x-m4v,video/x-matroska,video/msvideo,video/x-msvideo,video/avi,audio/flac,application/x-flac,audio/x-flac,video/quicktime,video/x-quicktime";
+var gd_export_extension=["mp4","webm","ogv","mp3","ogg","wav","m4a","flv","m4v"];
+var gd_state='';
+
+var gd_picker,gd_loaded,gd_pickerloaded,gd_lastprogress,gd_issupported,gd_isdownloading,gd_load_timer,gd_bloburl,gd_state2;
+var gd_loginexp=0;
+var gd_callback;
+var ismsie=false;
+if(navigator.appName!="Netscape"){
+	if(navigator.userAgent.indexOf("MSIE")>=0) ismsie=true;
+}
+
+function number_format(number, decimals, dec_point, thousands_sep) {
+  number = (number + '').replace(/[^0-9+\-Ee.]/g, '');
+  var n = !isFinite(+number) ? 0 : +number,
+    prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+    sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
+    dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
+    s = '',
+    toFixedFix = function (n, prec) {
+      var k = Math.pow(10, prec);
+      return '' + Math.round(n * k) / k;
+    };
+  // Fix for IE parseFloat(0.55).toFixed(0) = 0;
+  s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
+  if (s[0].length > 3) {
+    s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+  }
+  if ((s[1] || '').length < prec) {
+    s[1] = s[1] || '';
+    s[1] += new Array(prec - s[1].length + 1).join('0');
+  }
+  return s.join(dec);
+}
+var messagetimer=null;
+function show_message(s,x,y,padding,timeout){
+function getWindowWidth(){
+    var windowWidth = 0;
+    if (typeof(window.innerWidth) == 'number'){
+        windowWidth = window.innerWidth;
+    }else{
+        var ieStrict = document.documentElement.clientWidth;
+        var ieQuirks = document.body.clientWidth; 
+        windowWidth = (ieStrict > 0) ? ieStrict : ieQuirks;
+    }
+	if(!windowWidth) windowWidth=0;
+    return windowWidth;
+}
+function getWindowHeight(){
+    var windowHeight = 0;
+    if (typeof(window.innerHeight) == 'number'){
+        windowHeight = window.innerHeight;
+    }else{
+        var ieStrict = document.documentElement.clientHeight; 
+        var ieQuirks = document.body.clientHeight;
+        windowHeight = (ieStrict > 0) ? ieStrict : ieQuirks;
+    }
+	if(!windowHeight) windowHeight=0;
+    return windowHeight;
+}
+
+function getScrollLeft(){
+    var scrollLeft;
+	if(document.body && document.body.scrollLeft){
+		scrollLeft = document.body.scrollLeft;
+	}else if(document.documentElement && document.documentElement.scrollLeft){
+		scrollLeft = document.documentElement.scrollLeft;
+	}
+	if(!scrollLeft) scrollLeft=0;
+    return scrollLeft;
+}
+
+function getScrollTop(){
+    var scrollTop;
+	if(document.body && document.body.scrollTop){
+		scrollTop = document.body.scrollTop;
+	}else if(document.documentElement && document.documentElement.scrollTop){
+		scrollTop = document.documentElement.scrollTop;
+	}
+	if(!scrollTop) scrollTop=0;
+    return scrollTop;
+} 
+
+	if (!x) x=10;
+	if (!y) y=10;
+	if (!padding) padding=5;
+	if (!timeout) timeout=2000;
+
+	var kind=1;
+	for(var i=1; i <= 4; i++){
+		var s1="layer_message";
+		if (i>1) s1="layer_message"+i;
+		var obj=document.getElementById(s1);
+		if (obj){
+			kind=i;
+			break;
+		}
+	}
+			
+	obj.style.left="1px";
+	obj.style.top="1px";		
+	obj.innerHTML="<label>"+s+"</label>";
+	obj.style.display="";	
+	
+	if (kind==1) {
+		x=getScrollLeft()+x;	
+		y=getScrollTop()+y;
+	} else if (kind==2) {
+		x=getScrollLeft()+((getWindowWidth()-obj.clientWidth) / 2);
+		y=getScrollTop()+((getWindowHeight()-obj.clientHeight) / 2);
+	} else if (kind==3) {
+		x=document.body.offsetWidth-obj.clientWidth-5;
+		y=getScrollTop()+y;
+	} else {
+		x=getScrollLeft()+((getWindowWidth()-obj.clientWidth) / 2);
+		y=getScrollTop()+y;
+	}
+	x=parseInt(x);
+	y=parseInt(y);
+	
+	obj.style["border"]="1px solid #000000";
+	obj.style["padding"]=padding+"px";
+	obj.style.left=x+"px";
+	obj.style.top=y+"px";
+	
+	if (messagetimer) clearTimeout(messagetimer);
+	messagetimer=setTimeout(hide_message, timeout);
+}
+function hide_message(){
+	for(var i=1; i <= 4; i++){
+		var s1="layer_message";
+		if (i>1) s1="layer_message"+i;
+		var obj=document.getElementById(s1);
+		if (obj){
+			obj.style.display="none";
+		}
+	}
+}
+function gd_btn_login2(){
+function getWindowWidth(){
+    var windowWidth = 0;
+    if (typeof(window.innerWidth) == 'number'){
+        windowWidth = window.innerWidth;
+    }else{
+        var ieStrict = document.documentElement.clientWidth;
+        var ieQuirks = document.body.clientWidth; 
+        windowWidth = (ieStrict > 0) ? ieStrict : ieQuirks;
+    }
+	if(!windowWidth) windowWidth=0;
+    return windowWidth;
+}
+function getWindowHeight(){
+    var windowHeight = 0;
+    if (typeof(window.innerHeight) == 'number'){
+        windowHeight = window.innerHeight;
+    }else{
+        var ieStrict = document.documentElement.clientHeight; 
+        var ieQuirks = document.body.clientHeight;
+        windowHeight = (ieStrict > 0) ? ieStrict : ieQuirks;
+    }
+	if(!windowHeight) windowHeight=0;
+    return windowHeight;
+}
+function getScrollLeft(){
+    var scrollLeft;
+	if(document.body && document.body.scrollLeft){
+		scrollLeft = document.body.scrollLeft;
+	}else if(document.documentElement && document.documentElement.scrollLeft){
+		scrollLeft = document.documentElement.scrollLeft;
+	}
+	if(!scrollLeft) scrollLeft=0;
+    return scrollLeft;
+}
+function getScrollTop(){
+    var scrollTop;
+	if(document.body && document.body.scrollTop){
+		scrollTop = document.body.scrollTop;
+	}else if(document.documentElement && document.documentElement.scrollTop){
+		scrollTop = document.documentElement.scrollTop;
+	}
+	if(!scrollTop) scrollTop=0;
+    return scrollTop;
+} 
+	var a=_getid("gd_btn_login");
+	if(a.style.display==''){
+		var x=getScrollLeft()+((getWindowWidth()-a.clientWidth) / 2);
+		var y=getScrollTop()+((getWindowHeight()-a.clientHeight) / 2);
+		a.style["border"]="1px solid #000000";
+		a.style["padding"]="10px";
+		a.style.left=x+"px";
+		a.style.top=y+"px";
+		var b=_getid("gd_frame");
+		b.style.left=x+"px";
+		b.style.top=y+"px";
+		b.style.width=a.offsetWidth+"px";
+		b.style.height=a.offsetHeight+"px";
+		b.style.display='';
+	}
+}
+function gd_btn_login(isshow){
+	var a=_getid("gd_btn_login");
+	if(isshow){
+		a.style.display='';
+		gd_btn_login2();
+	}else{
+		a.style.display='none';
+		_getid("gd_frame").style.display='none';
+	}
+}
+function gd_login_close(){
+	gd_btn_login(false);
+	gd_state='';
+}
+function gd_login_manual(){
+	var p={'client_id': CLIENT_ID, 'scope': SCOPES.join(' '), 'immediate': false};
+	if(gd_userId){p['login_hint']=gd_userId;p['authuser']=-1;}
+	gapi.auth.authorize(p, function (authResult){ 
+		if (authResult && !authResult.error){
+			gd_loginexp=(new Date()).getTime()+parseInt(authResult.expires_in*0.7*1000);
+			gd_btn_login(false);gd_info();
+			show_message("Login ok!!");
+			if(gd_callback) gd_callback(true);
+			else gd_open_state(true);
+		}else{
+			gd_btn_login(true);
+			show_message("Login failed!!");
+		}
+	});
+}
+function gd_login(callback,react,force){
+	if(force || gd_loginexp==0 || gd_loginexp<(new Date()).getTime()){
+	}else{
+		callback(true);
+		return;
+	}
+	var p={'client_id': CLIENT_ID, 'scope': SCOPES.join(' '), 'immediate': true};
+	if(gd_userId){p['login_hint']=gd_userId;p['authuser']=-1;}
+	gapi.auth.authorize(p, function (authResult){
+		if (authResult && !authResult.error){
+			gd_loginexp=(new Date()).getTime()+parseInt(authResult.expires_in*0.7*1000);
+			gd_btn_login(false);gd_info();
+			callback(true);
+		}else{
+			show_message("Login failed!!");
+			gd_btn_login(true);
+			callback(false);
+			if(react) gd_callback=callback;
+			else gd_callback=null;
+		}
+	});
+}
+
+function gd_loadpicker() {		
+	gapi.load('picker',{'callback': function(){
+			gd_pickerloaded=true;
+		}
+	});	
+}
+function gd_createpicker() {
+	var access_token=gapi.auth.getToken().access_token;
+	if(!access_token){
+		alert('Error!! No access token.');
+		return;
+	}
+	if(!gd_picker){
+	  var view2 = new google.picker.DocsView(google.picker.ViewId.DOCS);
+	  if(gd_mimetype) view2.setMimeTypes(gd_mimetype);
+	  view2.setMode(google.picker.DocsViewMode.LIST);
+
+		var view4 = new google.picker.DocsView();
+		view4.setIncludeFolders(true);
+		view4.setParent("root");
+		//view4.setMimeTypes(gd_mimetype);
+		view4.setMode(google.picker.DocsViewMode.LIST);
+		var view5 = new google.picker.View(google.picker.ViewId.RECENTLY_PICKED);
+
+      gd_picker = new google.picker.PickerBuilder()
+          //.enableFeature(google.picker.Feature.NAV_HIDDEN)
+          //.enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+		  .setLocale("en")
+          .setOAuthToken(access_token)
+		  .setAppId(CLIENT_ID.split("-")[0]) //scope
+		  .setTitle("")
+          .addView(view2)
+		  .addView(view4)
+		  .addView(view5)
+          .addView(new google.picker.DocsUploadView())
+          .setDeveloperKey(gd_developerKey)
+          .setCallback(gd_pickercallback)
+          .build();
+	}
+	gd_picker.setVisible(true);
+}
+function gd_pickercallback(data) {
+	if (data.action == google.picker.Action.PICKED) {
+		//console.log(data);
+		if(data.docs && data.docs.length>0 && data.docs[0].id){
+	        var fileId = data.docs[0].id;
+			gd_loadfile(fileId);
+		}
+	}
+}
+function gd_loadfile(fileId,callback){
+	if(gadb){alert('Please disable the adblock for free use.');return;}
+	if(gd_isdownloading){
+		alert("It's downloading. Please try again in a few minutes. or Cancel the current download.");
+		return;
+	}
+	_getid("downlink").innerHTML="<table><tr><td><div id='gd_progress'>Ready...</div></table>";
+	gapi.client.load('drive', 'v2', function() {
+		var request = gapi.client.drive.files.get({
+			'fileId': fileId
+		});
+		request.execute(function(resp){
+			function end(){
+				gd_isdownloading=false;
+				clearTimeout(messagetimer);
+				hide_message();
+				var a=_getid("downlink");
+				if(a.innerHTML && a.innerHTML.indexOf("adownlink")<0){
+					_getid("downlink").innerHTML='Get a video, audio file from Google Drive, and Play the file directly. Provides connect with Google Drive.';
+				}
+			}
+			function error(s){
+				alert(s);
+			}
+			//console.log(resp);
+
+			var downloadurl;
+			if(resp.downloadUrl){
+				downloadurl='https://www.googleapis.com/drive/v2/files/'+resp.id+'?alt=media';//resp.downloadUrl;
+			/*}else if(resp.exportLinks){
+				for (x in resp.exportLinks){	
+					for(var i = 0; i < gd_export_extension.length; i++){    
+						if(x.toLowerCase().indexOf(gd_export_extension[i])>=0){
+							downloadurl=resp.exportLinks[x];
+							break;
+						}						
+					}					
+					if(downloadurl)break;
+				}*/
+			}
+			var accessToken = gapi.auth.getToken().access_token;
+			if(!accessToken){
+				end();
+				alert('Error!! No access token.');
+				return;
+			}
+			if(downloadurl){				
+				function setdown(url, blobsize){
+					resp.udownlink=resp.webContentLink;
+					var data={};
+					data.src=url;
+					data.blobsize=blobsize;
+					data.resp=resp;
+					proc_audioplay(data);						
+				}
+				gd_isdownloading=true;
+				_getid("downlink").innerHTML="<table><tr><td><img src='images/wait.gif' align='absmiddle'><td><div id='gd_progress'>Downloading...</div><td>&nbsp; <a href='#' id='gd_cancel' style='font-size:15px;display:none'>Cancel</a></table>";
+
+				/*if(resp.fileSize && resp.fileSize<90*1024*1024){
+					setTimeout(function(){
+						end();
+						setdown(resp.webContentLink);					
+					},50);
+					return;
+				}*/
+				var range=0;
+				if(resp.fileSize && resp.fileSize>300*1024*1024){
+					range=300*1024*1024;
+					alert('The media file size ('+getsize(resp.fileSize)+') is too large to load directly.\nOnly 300 megabytes will be downloaded from the start of the file.\n(Google Drive 300 MB limit)');
+				}
+				try{
+					var xhr = new XMLHttpRequest();
+					var c=_getid('gd_cancel');
+					if(c){
+						c.style.display='';
+						c.onclick=function(){
+							xhr.abort(); 
+							end();
+							return false;
+						}
+					}
+					gd_lastprogress=(new Date()).getTime();
+					xhr.open('GET', downloadurl);//+'&access_token='+encodeURIComponent(accessToken)
+					xhr.responseType = 'arraybuffer';
+					xhr.onprogress=function(event){
+						if(gd_lastprogress){
+							var elaspetime = new Date();
+							var dt=(elaspetime.getTime()-gd_lastprogress)/1000;
+							if(dt<1)return;
+							gd_lastprogress=elaspetime.getTime();
+						}
+						var a=event;
+						var total=range || a.totalSize || resp.fileSize || 0;//a.total 
+						if(total>=18446744073709552000) total=0;
+						var current=a.position || a.loaded  || 0;
+						var s1='Downloading... ('+number_format(current)+'/'+number_format(total)+')';
+						var c=_getid('gd_progress');
+						if(c) c.innerHTML=s1;
+					};
+					xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+					if(range) xhr.setRequestHeader('Range', 'bytes=0-'+range);
+				    xhr.onload = function(){
+						end();
+						if(this.status == 200 || this.status == 206){							
+							var blob = new Blob([this.response], {type: getmimetype2(resp.mimeType, getmimetype(resp.title))});
+							var burl=window.URL.createObjectURL(blob);
+							setdown(burl, blob.size);
+						}else{
+							alert("Error (status) " + this.status + "("+this.statusText+") occurred while receiving the file.");
+						}
+					};
+					xhr.onerror = function(e){      
+						end();
+						alert("Error " + e.target.status + " occurred while receiving the file.");
+					};
+					xhr.send();
+				}catch(err){
+					end();
+					alert(err+'\n\nor This browser does not support. Please upgrade your browser.');
+				}
+
+			}else{
+				end();
+				if(resp.error && resp.error.message){
+					alert(resp.error.message);
+				}else{
+					alert('Error!! Can not find a download URL for media file.');
+				}
+			}
+		});
+	});
+}
+function gd_open_picker(){
+	if(!gd_issupported){
+		alert("This browser does not support.");
+		return;
+	}
+	if(!gd_loaded || !gd_pickerloaded){
+		if(!gd_load_timer) gd_loadscript(gd_open_picker);
+		else alert('Not loaded library. Please try again in a few minutes.');
+		return;
+	}
+	gd_login(function(result){
+		if(!result)return;
+		gd_createpicker();
+	},true);
+}
+function gd_getparam(s,name){
+	name=name+"=";
+	name=name.toLowerCase();
+	var p1=s.toLowerCase().indexOf(name);
+	if (p1<0) return "";
+	s=s.substr(p1+name.length);
+	var p2=s.toLowerCase().indexOf("&");
+	if (p2>=0) {
+		return s.substr(0,p2);
+	} else {
+		return s;
+	}
+}
+function gd_open_state(force){
+	var s=gd_state;
+	if(s){
+		if(!gd_issupported){
+			gd_state='';
+			alert("This browser does not support.");
+			return;
+		}
+		s=decodeURIComponent(s);
+		try{
+			var a=JSON.parse(s);
+			var fileId;
+			if(a.ids) fileId=a.ids[0];
+			if(!fileId && a.exportIds) fileId=a.exportIds[0];
+			if(fileId){
+				gd_login(function(result){
+					if(gd_open2 && !force)return;
+					gd_open2=true;
+					if(!result) return;
+					gd_state='';
+					gd_loadfile(fileId);
+				});				
+			}
+		}catch(err){
+		}
+	}
+}
+function gd_clientload(){
+	gd_loaded=true;
+	if (window.addEventListener){
+		window.addEventListener("resize", gd_btn_login2, false);
+	}else if (window.attachEvent){
+		window.attachEvent("onresize", gd_btn_login2);
+	}
+	gd_open_state();
+}
+var gd_open2;
+function gd_open_state2(){
+	setTimeout(function(){
+		if(!gd_open2)gd_open_state();
+	}, 1000);
+}
+
+function gd_loadscript(callback){
+	function inject(s){
+		var o = document.createElement('scri' + 'pt');
+		o.setAttribute('src', s);
+		o.setAttribute('type', 'text/javascript');
+		document.body.appendChild(o);
+	}
+	if(gd_load_timer)return;
+	if(gd_loaded && gd_pickerloaded)return;
+	gd_load_timer=setInterval(function(){
+		if(gd_loaded && gd_pickerloaded){
+			clearInterval(gd_load_timer);
+			if(callback) callback();
+		}
+	},100);
+	inject('https://apis.google.com/js/client.js?onload=gd_clientload');
+	inject('https://apis.google.com/js/api.js?onload=gd_loadpicker');	
+}
+
+var gd_userId="";var gd_email;
+function gd_weburl(){
+	var s;
+	if(gd_email) s='https://drive.google.com/?authuser='+gd_email;
+	else s='https://drive.google.com/';
+	return s;
+}
+function gd_info(){
+	if(gd_email)return;
+	gapi.client.load('drive', 'v2', function(){
+		var request = gapi.client.drive.about.get();
+		request.execute(function(resp) {
+			if(resp && resp.user){
+				if(gd_email)return;
+				gd_email=resp.user.emailAddress;
+				if(gd_email){
+					var a=_getid('btn_open');
+					if(a)a.title=a.title+' ('+gd_email+')';
+				}				
+			}
+		});
+	});
+}
+function gd_dblclick(){
+	function dblclick(){
+		try{
+			if(gd_picker)gd_picker.setVisible(false);
+		}catch(err){}
+	}
+	function keydown(e){
+		if(!e)e=window.event;
+		if(e && e.keyCode==27) dblclick();
+	}
+	if(window.addEventListener){
+		document.addEventListener("dblclick", dblclick, false);
+		document.addEventListener("keydown", keydown, false);
+	}else if(window.attachEvent){
+		document.attachEvent("ondblclick", dblclick);
+		document.attachEvent("onkeydown", keydown);
+	}
+}
+function gd_init(){
+	gd_dblclick();
+	gd_state2=gd_state;
+	if(!window.XMLHttpRequest){//!window.FileReader || !window.URL 
+	}else{
+		gd_issupported=true;
+		if(gd_state){
+			try{
+				var a=JSON.parse(gd_state);
+				gd_userId=a.userId;
+				if(a.ids || a.exportIds){
+					_getid("downlink").innerHTML="<table><tr><td><div id='gd_progress'>Ready...</div></table>";
+				}
+			}catch(err){}			
+			if(window.addEventListener) window.addEventListener("load", gd_open_state2, false);
+			else if (window.attachEvent) window.attachEvent("onload", gd_open_state2);
+		}
+		gd_loadscript();
+	}
+}
+//gd_init();
+</script>
+<script src="https://storage.googleapis.com/app0126/js/compat2.js"></script>
+<script>init_compat201912_a();</script>
+
+
+<td align=right valign=top>
+
+</table>
+
+<script>
+function init_before(){
+	}
+function init_onload(){
+		
+		
+	setCookie('c_dictionary_lastmenu',"Video_Player_Drive");
+}
+gload2=true;
+init();
+init_before();
+</script>
+
+<style>
+a.bottomlink:link{text-decoration:underline;}
+a.bottomlink:visited{text-decoration:underline;}
+a.bottomlink:active{text-decoration:underline;}
+a.bottomlink:hover{text-decoration:underline;}
+</style>
+<table id="bottomtable" align=center>
+<tr><td height=7>
+<tr><td align=center><span id="bottomtitle">ⓒ Video Dictionary, YouTube Dictionary, 2023</span>
+</table>
+<br>
+
+
+
+<script>
+if(window.gd_init) gd_init();
+</script>
+<script>
+if(gload1 && window.proc_initfeed) proc_initfeed();
+if(gload2 && window.init_onload) init_onload();
+</script>
+<script>
+function gd_findscope(s){
+	function trim(str){return (str || '').replace(/^\s*|\s*$/g,"");}
+	var s1;
+	try{
+		if(!s) return false;
+		s=' '+s.toLowerCase()+' ';
+		for(var i = 0; i < SCOPES.length; i++){    
+			if(!SCOPES[i])continue;
+			s1=trim(SCOPES[i].split('/').pop().toLowerCase());
+			//if(s1=='drive.appfolder') s1='drive.appdata';
+			if(!/^(drive\.install|drive\.file|drive)$/.test(s1)) continue;
+			if(s.indexOf(s1+' ')<0) return false;
+		}
+	}catch(err){}
+	return true;
+}
+function init_fix_scope(){	
+	var a=window.gd_login_manual;
+	var b=window.gd_login;
+	if(!a) a=window.proc_login_manual; if(!b) b=window.proc_login;
+	if(a) a=a+''; if(b) b=b+'';
+	var ss='if (authResult && !authResult.error';
+	var ss2='if (authResult && (!authResult.error || authResult.access_token)';
+	if(a && a.indexOf(ss)>=0 && a.indexOf('gd_findscope(')<0){
+		a=a.replace(ss,'if (authResult && !authResult.error && gd_findscope(authResult.scope)');window.eval(a);
+	}else if(a && a.indexOf(ss2)>=0 && a.indexOf('gd_findscope(')<0){
+		a=a.replace(ss2,'if (authResult && (!authResult.error || authResult.access_token) && gd_findscope(authResult.scope)');window.eval(a);
+	}
+	if(b && b.indexOf(ss)>=0 && b.indexOf('gd_findscope(')<0){
+		b=b.replace(ss,'if (authResult && !authResult.error && gd_findscope(authResult.scope)');window.eval(b);
+	}else if(b && b.indexOf(ss2)>=0 && b.indexOf('gd_findscope(')<0){
+		b=b.replace(ss2,'if (authResult && (!authResult.error || authResult.access_token) && gd_findscope(authResult.scope)');window.eval(b);
+	}
+}
+init_fix_scope();
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "short_name": "Dune",
+  "name": "Dune",
+  "icons": [
+    {
+      "src": "https://img.gamedistribution.com/2db18707d0a0495c962134c67d087008-512x384.jpeg",
+      "type": "image/jpeg",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "https://img.gamedistribution.com/2db18707d0a0495c962134c67d087008-512x384.jpeg",
+      "type": "image/png",
+      "sizes": "144x144",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "/2db18707d0a0495c962134c67d087008/index.html",
+  "background_color": "#3367D6",
+  "display": "standalone",
+  "scope": "/2db18707d0a0495c962134c67d087008/",
+  "theme_color": "#3367D6"
+}
