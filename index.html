@@ -22,7 +22,7 @@
 body {
  background: #5C8374;
  margin: 50px;
- color: #183D3D;
+ color: #000000;
  text-align: center;
  font-family: Helvetica, sans-serif;
   }
@@ -270,9 +270,48 @@ body {
         transform: translateX(1);
     }
 }
-</style>
-  <body>
 
+/* Center the loader */
+#loader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: 120px;
+  height: 120px;
+  margin: -76px 0 0 -76px;
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@-webkit-keyframes animatebottom {
+  from { bottom:-100px; opacity:0 } 
+  to { bottom:0px; opacity:1 }
+}
+
+@keyframes animatebottom { 
+  from{ bottom:-100px; opacity:0 } 
+  to{ bottom:0; opacity:1 }
+}
+</style>
+  <body onload="contentToHide">
+
+    <div id="loader"></div>
+      
+  <div id="contentToHide" style="display: none;">
     <div>
       <div class="wave"></div>
       <div class="wave"></div>
@@ -280,8 +319,8 @@ body {
    </div>
 
      <!-- Div content -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
-	<div class="text-center">
+	  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+	  <div class="text-center">
 
     <a onclick="window.location.href='quiz.html';"><div class="ad"><img class="img" width="500px" height="125px" src="Lukes shed v41.png"></div></a>
 
@@ -415,6 +454,7 @@ body {
    
         <div id="noResultsMessage" style="display: none;">No results found.</div>
       </ul>
+  </div>
       <script>
 function myFunction() {
     var input, filter, divs, i, txtValue;
@@ -441,5 +481,20 @@ function myFunction() {
         noResultsMessage.style.display = 'none';
     }
 }
+
+var myVar;
+
+function startTimer() {
+    myVar = setTimeout(showPage, 3000);
+}
+
+function showPage() {
+    // Hide the loader and show the content
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("contentToHide").style.display = "block";
+}
+
+// Call startTimer function to initiate the timer when the page loads
+startTimer();
 
       </script>
