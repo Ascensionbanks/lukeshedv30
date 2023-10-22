@@ -6,7 +6,10 @@
 
 <style>
 body {
-margin: 80px;
+ background: #5C8374;
+ margin: 40px;
+ margin: 50px;
+ color: #183D3D;
  text-align: center;
  font-family: Helvetica, sans-serif;
   }
@@ -20,14 +23,15 @@ p {
 
 .topnav {
   overflow: hidden;
-  background-color: #42426882;
+  background-color: #93B1A6;
+  background-color: #9d9d9da1;
   position: -webkit-sticky;
   position: sticky;
   padding: 10px;
   -webkit-transition-duration: 0.4s; /* Safari */
   transition-duration: 0.4s;
   border-radius: 10px 10px;
-  border: #000000 solid;
+  border: #2d3633 solid;
 }
 
 .topnav:hover {
@@ -36,6 +40,7 @@ p {
 
 .topnav a {
   float: left;
+  color: #183D3D;
   color: #dedede;
   text-align: center;
   padding: 30px 16px;
@@ -46,12 +51,15 @@ p {
 }
 
 .topnav a:hover {
+  background-color: #779087;
   background-color: #656565;
   color: rgb(255, 255, 255);
   border-radius: 10px 10px;
 }
 
 .topnav a.active {
+  background-color: #5c967f;
+  color: rgb(255, 255, 255);
   background-color: #dedede;
   color: rgb(150, 150, 150);
   border-radius: 10px 10px;
@@ -63,15 +71,17 @@ p {
 
 .btn {
   all: unset;
-  background-color: #42426882;
+  background-color: #93B1A6; /* Green */
+  background-color: #9d9d9da1;
   border: none;
-  color: white;
   padding: 15px 32px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  border: #000000 solid;
+  padding: 20px;
+  border: #2d3633 solid;
   font-size: 16px;
+  margin: 4px 2px;
   width: 40%;
   cursor: pointer;
   -webkit-transition-duration: 0.4s; /* Safari */
@@ -105,7 +115,8 @@ p {
 
 #myInput {
   margin-top: 10px;
-  background-color: #60608738;
+  background-color: #9bb9ae;
+  background-color: #dedede00;
   background-repeat: no-repeat; /* Do not repeat the icon image */
   width: 60%; /* Full-width */
   font-size: 16px; /* Increase font-size */
@@ -152,7 +163,8 @@ p {
 
 .ad {
   all: unset;
-  background-color: #42426882;
+  background-color: #93B1A6; /* Green */
+  background-color: #9d9d9da1;
   border: none;
   color: white;
   padding: 15px 32px;
@@ -171,6 +183,7 @@ p {
 .ad:hover {
   box-shadow: 0 12px 16px 0 rgba(255, 255, 255, 0.24),0 17px 50px 0 rgba(255, 255, 255, 0.19);
   border-radius: 10px 10px;
+  padding: 0px;
 
 }
 
@@ -188,7 +201,7 @@ p {
 body {
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     overflow: auto;
-    background: linear-gradient(315deg, rgb(39, 45, 93) 50%, rgb(25, 29, 32) 100%);
+    background: linear-gradient(315deg, rgb(70, 94, 99) 3%, rgb(61, 81, 100) 38%, rgb(83, 118, 115) 68%, rgb(7, 30, 87) 98%);
     animation: gradient 15s ease infinite;
     background-size: 400% 400%;
     background-attachment: fixed;
@@ -252,42 +265,6 @@ body {
     100% {
         transform: translateX(1);
     }
-}
-
-/* Center the loader */
-#loader {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 1;
-  width: 120px;
-  height: 120px;
-  margin: -76px 0 0 -76px;
-  border: 16px solid #f3f3f3;
-  border-radius: 50%;
-  border-top: 16px solid #3498db;
-  -webkit-animation: spin 2s linear infinite;
-  animation: spin 2s linear infinite;
-}
-
-@-webkit-keyframes spin {
-  0% { -webkit-transform: rotate(0deg); }
-  100% { -webkit-transform: rotate(360deg); }
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@-webkit-keyframes animatebottom {
-  from { bottom:-100px; opacity:0 } 
-  to { bottom:0px; opacity:1 }
-}
-
-@keyframes animatebottom { 
-  from{ bottom:-100px; opacity:0 } 
-  to{ bottom:0; opacity:1 }
 }
 </style>
 
