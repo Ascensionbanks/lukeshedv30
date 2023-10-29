@@ -178,7 +178,7 @@ p {
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  border: rgb(0, 0, 0) solid;
+  border: #2d3633 solid;
   font-size: 16px;
   margin: 4px 2px;
   cursor: pointer;
@@ -298,11 +298,12 @@ body {
 
 
     <div class="topnav">
+      <a href="settings.html">⚙️</a>
       <a href="index.html">Popular</a>
       <a class="active" href="flash.html">Flash</a>
       <a href="unity.html">Unity</a>
       <a href="multiplayer.html">Multiplayer</a>
-      <input class="key" type="text" id="myInput" onkeyup="myFunction()" placeholder="Search Luke Shed V.15">
+      <input class="key" type="text" id="myInput" onkeyup="myFunction()" placeholder="Search Luke Shed V.40">
 
     </div>
 
@@ -658,4 +659,39 @@ function showPage() {
 
 // Call startTimer function to initiate the timer when the page loads
 startTimer();
+
+let seconds = 0;
+let minutes = 0;
+let hours = 0;
+let display = document.getElementById('timer');
+let startTime = localStorage.getItem('startTime');
+
+if (startTime) {
+    startTime = parseInt(startTime);
+} else {
+    startTime = Date.now();
+    localStorage.setItem('startTime', startTime);
+}
+
+setInterval(function() {
+    let currentTime = Date.now();
+    let elapsedTime = Math.floor((currentTime - startTime) / 1000);
+
+    hours = Math.floor(elapsedTime / 3600);
+    elapsedTime %= 3600;
+    minutes = Math.floor(elapsedTime / 60);
+    seconds = elapsedTime % 60;
+
+    display.innerHTML = (hours ? (hours > 9 ? hours : "0" + hours) : "00") + ":" + (minutes ? (minutes > 9 ? minutes : "0" + minutes) : "00") + ":" + (seconds > 9 ? seconds : "0" + seconds);
+}, 1000);
+
+window.onbeforeunload = function() {
+    let timeSpent = {
+        hours: hours,
+        minutes: minutes,
+        seconds: seconds
+    };
+    localStorage.setItem('timeSpent', JSON.stringify(timeSpent));
+};
+
       </script>

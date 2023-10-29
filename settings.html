@@ -1,20 +1,11 @@
-
-
-
-<html><head>
-
-	<meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Lukes Shed V40</title>
-    <link rel="icon" type="image/x-icon" href="v40fav.png">
-<script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-XXGG6SJL6H&amp;l=dataLayer&amp;cx=c"></script><script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-243532838-1"></script><script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-243532838-1');
-</script><style>
-body {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Timer</title>
+    <style>
+        body {
  margin: 100px;
  color: #ffffff;
  text-align: center;
@@ -122,7 +113,6 @@ p {
 
 #myInput {
   margin-top: 10px;
-  background-color: #9bb9ae;
   background-color: #dedede00;
   background-repeat: no-repeat; /* Do not repeat the icon image */
   width: 60%; /* Full-width */
@@ -274,103 +264,58 @@ body {
         transform: translateX(1);
     }
 }
-</style></head>
 
-
-
-
-  <body onload="contentToHide">
-
-    <div id="loader" style="display: none;"></div>
-      
-  <div id="contentToHide" style="display: block;">
-    <div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-   </div>
-
-     <!-- Div content -->
-	  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
-	  <div class="text-center">
-
-    <a onclick="window.location.href='quiz.html';"><div class="ad"><img class="img" width="250px" height="125px" src="Lukes shed v40.png"></div></a>
-
-    
-    <div class="topnav">
-      <a href="settings.html">⚙️</a>
-      <a href="index.html">Popular</a>
-      <a href="flash.html">Flash</a>
-      <a href="unity.html">Unity</a>
-      <a class="active" href="multiplayer.html">Multiplayer</a>
-      <input class="key" type="text" id="myInput" onkeyup="myFunction()" placeholder="Search Luke Shed V.40">
-
-    </div>
-    <div class="linkpicture"> <button class="btn" onclick="window.location.href='lbannana-assets/html/soccerrandom/index.html';"><img class="games" src="https://i.ibb.co/kgjKM9k/soccer-random.webp">Soccer Random</button></div>
-
-    <div class="linkpicture"> <button class="btn" onclick="window.location.href='lbannana-assets/html/tag/tag.html';"><img class="games" src="https://i.ibb.co/4fpDKQK/tag.webp">Tag</button></div>
-
-    <div class="linkpicture"> <button class="btn" onclick="window.location.href='lbannana-assets/html/rooftopsnipers/rooftopsnipers.html';"><img class="games" src="https://i.ibb.co/SQzLZZZ/rooftop-snipers.webp">Rooftop Snipers</button></div>
-
-    <div class="linkpicture"> <button class="btn" onclick="window.location.href='lbannana-assets/html/basketrandom/basketrandom.html';"><img class="games" src="https://i.ibb.co/r7JDW29/basketrandom.png">Basket Random</button></div>
-
-   <div class="linkpicture"> <button class="btn" onclick="window.location.href='lbannana-assets/html/1v1.lol/index.html';"><img class="games" src="https://i.ibb.co/hDLL4KH/1v1.webp">1v1.LOL</button></div>
-
-  <div class="linkpicture"> <button class="btn" onclick="window.location.href='lbannana-assets/html/slope-2/index.html';"><img class="games" src="https://i.ibb.co/syNtSq9/R04V0UK.webp">Slope 2</button></div>
-	 
-	
-
-    <div class="container">
-
-
-      <ul id="myul">
-
-        <div id="noResultsMessage" style="display: none;">No results found.</div>
-      </ul>
-    </div>
-      <script>
-function myFunction() {
-    var input, filter, divs, i, txtValue;
-    input = document.getElementById('myInput');
-    filter = input.value.toUpperCase();
-    divs = document.getElementsByClassName('linkpicture');
-    var visibleCount = 0; // Track the number of visible elements
-
-    for (i = 0; i < divs.length; i++) {
-        txtValue = divs[i].textContent || divs[i].innerText;
-        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            divs[i].style.display = '';
-            visibleCount++; // Increment visible element count
-        } else {
-            divs[i].style.display = 'none';
-        }
-    }
-
-    // Check if there are no visible elements, then show a message
-    var noResultsMessage = document.getElementById('noResultsMessage');
-    if (visibleCount === 0) {
-        noResultsMessage.style.display = 'block';
-    } else {
-        noResultsMessage.style.display = 'none';
-    }
+.txt {
+  all: unset;
+  background-color: #93B1A6; /* Green */
+  background-color: #9d9d9da1;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  border: #2d3633 solid;
+  font-size: 20px;
+  margin: 4px 2px;
+  cursor: pointer;
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+  border-radius: 10px 10px;
+  margin: 10px;
+  width: 80%;
 }
 
-var myVar;
+        </style>
 
-function startTimer() {
-    myVar = setTimeout(showPage, 100);
-}
+</head>
+<body>
+        <div>
+          <div class="wave"></div>
+          <div class="wave"></div>
+          <div class="wave"></div>
+       </div>
+       <a onclick="window.location.href='quiz.html';"><div class="ad"><img class="img" width="250px" height="125px" src="Lukes shed v40.png"></div></a>
 
-function showPage() {
-    // Hide the loader and show the content
-    document.getElementById("loader").style.display = "none";
-    document.getElementById("contentToHide").style.display = "block";
-}
-
-// Call startTimer function to initiate the timer when the page loads
-startTimer();
-
-let seconds = 0;
+       <div class="topnav">
+        <a class="active" href="settings.html">⚙️</a>
+        <a href="index.html">Popular</a>
+        <a href="flash.html">Flash</a>
+        <a href="unity.html">Unity</a>
+        <a href="multiplayer.html">Multiplayer</a>
+        <input class="key" type="text" id="myInput" onkeyup="myFunction()" placeholder="Search Luke Shed V.40">
+      </div>
+  
+      <div class="txt">
+    <p>The amount of time you spent: <span id="timer">0:00</span></p></div>
+    <div class="ad"><img class="img" width="250px" height="125px" src="Normal.png"></div></a>
+    <div class="ad"><img class="img" width="250px" height="125px" src="mid.png"></div></a>
+    <div class="ad"><img class="img" width="250px" height="125px" src="l.png"></div></a>
+    <div class="ad"><img class="img" width="250px" height="125px" src="nerd.png"></div></a>
+</body>
+</html>
+    <script>// Initialize variables
+       let seconds = 0;
 let minutes = 0;
 let hours = 0;
 let display = document.getElementById('timer');
@@ -404,5 +349,4 @@ window.onbeforeunload = function() {
     localStorage.setItem('timeSpent', JSON.stringify(timeSpent));
 };
 
-
-      </script>
+        </script>
