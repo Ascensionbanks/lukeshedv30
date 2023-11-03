@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Website Timer</title>
+    <title>Lukes Shed V40</title>
+    <link rel="icon" type="image/x-icon" href="v40fav.png">
+
     <style>
         body {
  margin: 100px;
@@ -286,6 +289,13 @@ body {
   width: 80%;
 }
 
+#timer {
+  font-size: 12px;
+}
+
+.timer {
+  font-size: 12px;
+}
         </style>
 
 </head>
@@ -307,7 +317,12 @@ body {
       </div>
   
       <div class="txt">
-    <p>The amount of time you spent on Lukes Shed:<br> <span id="timer">0:00</span></p></div>
+    <p class="timer">The amount of time you spent on Lukes Shed:<br> <span id="timer">0:00</span></p>
+    <h2>Luke Shed Link Dispenser:</h2>
+    <button class="btn" onclick="dispenseText()">Dispense A Link</button>
+    <p id="textDisplay"></p>
+  </div>
+
 </body>
 </html>
     <script>// Initialize variables
@@ -345,4 +360,15 @@ window.onbeforeunload = function() {
     localStorage.setItem('timeSpent', JSON.stringify(timeSpent));
 };
 
+function dispenseText() {
+      var texts = [
+        "https://ascensionbanks.github.io/andydsucks/",
+        "https://lukeripple807.github.io/binladen/",
+        "https://ascensionbanks.github.io/lukeshedv30/",
+      ];
+
+      var randomIndex = Math.floor(Math.random() * texts.length);
+      var textDisplay = document.getElementById("textDisplay");
+      textDisplay.textContent = texts[randomIndex];
+    }
         </script>
