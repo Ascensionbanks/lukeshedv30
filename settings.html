@@ -319,8 +319,7 @@ body {
       <div class="txt">
     <p class="timer">The amount of time you spent on Lukes Shed:<br> <span id="timer">0:00</span></p>
     <h2>Luke Shed Link Dispenser:</h2>
-    <button class="btn" onclick="dispenseText()">Dispense A Link</button>
-    <p id="textDisplay"></p>
+    <button class="btn" onclick="redirect()">Get Random Link</button>
   </div>
 
 </body>
@@ -359,16 +358,19 @@ window.onbeforeunload = function() {
     };
     localStorage.setItem('timeSpent', JSON.stringify(timeSpent));
 };
-
-function dispenseText() {
-      var texts = [
-        "https://ascensionbanks.github.io/andydsucks/",
-        "https://lukeripple807.github.io/binladen/",
-        "https://ascensionbanks.github.io/lukeshedv30/",
+function redirect() {
+      // Define an array of URLs
+      var urls = [
+        'https://ascensionbanks.github.io/andydsucks/',
+        'https://lukeripple807.github.io/binladen/',
+        'https://ascensionbanks.github.io/lukeshedv30/index.html',
+        // Add more URLs as needed
       ];
 
-      var randomIndex = Math.floor(Math.random() * texts.length);
-      var textDisplay = document.getElementById("textDisplay");
-      textDisplay.textContent = texts[randomIndex];
+      // Get a random URL from the array
+      var randomUrl = urls[Math.floor(Math.random() * urls.length)];
+
+      // Open the random URL in a new tab
+      window.open(randomUrl, '_blank');
     }
         </script>
